@@ -19,8 +19,7 @@ public class Square {
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
-    private int mZoomHandle;
-    private int mStrengthHandle;
+    private int mHMDParamsHandle;
 
     private FloatBuffer mCubeTextureCoordinates;
     private int mTextureUniformHandle;
@@ -95,7 +94,7 @@ public class Square {
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      */
-    public void draw(float[] mvpMatrix) {
+    public void draw(float[] mvpMatrix, float[] HMDParams) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(MyGLRenderer.mProgram);
 
@@ -116,11 +115,8 @@ public class Square {
                 texelStride, texelBuffer);
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
 
-        mStrengthHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Strength");
-        GLES20.glUniform1f(mStrengthHandle, 1.0f);
-
-        mZoomHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Zoom");
-        GLES20.glUniform1f(mZoomHandle, 1.00f);
+        mHMDParamsHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_HMDParams");
+        GLES20.glUniform1fv(mHMDParamsHandle, MainActivity.HMD_PARAMS_SIZE, FloatBuffer.wrap(HMDParams));
 
         mColorHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Color");
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);

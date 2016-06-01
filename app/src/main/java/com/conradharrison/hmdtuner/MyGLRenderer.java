@@ -56,28 +56,28 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        float[] scratch = new float[16];
 
         // Draw background color
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        int [] viewPortParams = new int[4];
-        GLES20.glGetIntegerv(GLES20.GL_VIEWPORT, viewPortParams, 0);
-        mScreenWidth = viewPortParams[2];
-        mScreenHeight = viewPortParams[3];
+        //int [] viewPortParams = new int[4];
+        //GLES20.glGetIntegerv(GLES20.GL_VIEWPORT, viewPortParams, 0);
+        //mScreenWidth = viewPortParams[2];
+        //mScreenHeight = viewPortParams[3];
 
         // Draw left square
         GLES20.glViewport(0, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams);
 
         // Draw right square
         GLES20.glViewport(mScreenWidth/2, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams);
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
+
         // Adjust the viewport based on geometry changes,
         // such as screen rotation
         mScreenWidth = width;
