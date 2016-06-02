@@ -24,7 +24,7 @@ public class Square {
     private FloatBuffer mCubeTextureCoordinates;
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
-    private int mBrickDataHandle;
+    private int mTextureHandle;
 
     private float mZoom;
     private float mStrength;
@@ -51,7 +51,7 @@ public class Square {
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final int texelStride = COORDS_PER_TEXEL * 4; // 4 bytes per vertex
 
-    float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
+    float color[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
@@ -85,9 +85,9 @@ public class Square {
         texelBuffer.position(0);
 
         // Read in an image and set as texture, store handle for later.
-        mBrickDataHandle = TextureHelper.loadTexture(context, R.raw.grid);
+        mTextureHandle = TextureHelper.loadTexture(context, R.raw.grid);
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mBrickDataHandle);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureHandle);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     }
 
