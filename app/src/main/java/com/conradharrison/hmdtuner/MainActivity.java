@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onAuthenticationError(FirebaseError firebaseError) {
                         Log.e(TAG, "Auth failed: " + firebaseError.getMessage());
+                        Toast.makeText(MainActivity.this, "Authentication with database server failed. Please restart server and try again.", Toast.LENGTH_SHORT).show();
+                        MainActivity.this.finish();
                     }
                 });
 
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(FirebaseError firebaseError) {
                         Log.e(TAG, "Firebase onDataChange() failed: " + firebaseError.getMessage());
+                        Toast.makeText(MainActivity.this, "Sync with database server failed. Please check database/server, and try again.", Toast.LENGTH_SHORT).show();
+                        MainActivity.this.finish();
                     }
                 });
             }
