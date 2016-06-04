@@ -36,7 +36,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -6, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         int vertexShader = ShaderHelper.compileShader(
                 GLES20.GL_VERTEX_SHADER,
@@ -61,10 +61,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        //int [] viewPortParams = new int[4];
-        //GLES20.glGetIntegerv(GLES20.GL_VIEWPORT, viewPortParams, 0);
-        //mScreenWidth = viewPortParams[2];
-        //mScreenHeight = viewPortParams[3];
+        // Recalculate furstum based on screen_to_lens_distance
+        float nearPlane = (3.0f / 0.042f) * MainActivity.mHMDParams[0];
+        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -1, 1, nearPlane==0.00f?0.01f:nearPlane, 7);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // Draw left square
         GLES20.glViewport(0, 0, mScreenWidth/2, mScreenHeight);
@@ -82,16 +82,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // such as screen rotation
         mScreenWidth = width;
         mScreenHeight = height;
-        GLES20.glViewport(0, 0, width, height);
+        //GLES20.glViewport(0, 0, width, height);
 
-        float ratio = 1.0f; //(float) width / height;
-
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        // Recalculate furstum based on screen_to_lens_distance
+        //float ratio = 1.0f; //(float) width / height;
+        //float nearPlane = (3.0f / 42.0f) * MainActivity.mHMDParams[0];
+        //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, nearPlane, 7);
 
         // Calculate MVP matrix
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        //Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
     }
 
     /**
