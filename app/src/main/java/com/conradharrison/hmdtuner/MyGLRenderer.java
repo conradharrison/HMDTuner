@@ -61,9 +61,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Recalculate furstum based on screen_to_lens_distance
-        float nearPlane = (3.0f / 0.042f) * MainActivity.mHMDParams[0];
-        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -1, 1, nearPlane==0.00f?0.01f:nearPlane, 7);
+        // Recalculate frustum based on screen_to_lens_distance.
+        // Keep nearPlan greater than 0.00f
+        float nearPlane = (3.0f / 42.0f) * MainActivity.mHMDParams[0];
+        nearPlane = (nearPlane==0.00f ? 0.01f : nearPlane);
+
+        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -1, 1, nearPlane, 7);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // Draw left square

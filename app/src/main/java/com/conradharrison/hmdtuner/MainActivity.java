@@ -2,6 +2,7 @@ package com.conradharrison.hmdtuner;
 
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Firebase mFirebaseRef;
     private String mFirebaseUID;
-
     public String mQRText;
 
     @Override
@@ -46,9 +46,11 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, QRActivity.class);
             startActivityForResult(intent, QR_REQUEST_CODE); // This intent will end automatically.
         } else {
-            mQRText = savedInstanceState.getString("QRData");
+            // Restored in onRestoreInstanceState()
+            //mQRText = savedInstanceState.getString("QRData");
         }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -88,10 +90,10 @@ public class MainActivity extends AppCompatActivity {
                         mHMDParams[5] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_g").child("1").getValue(Double.class).floatValue();
                         mHMDParams[6] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("0").getValue(Double.class).floatValue();
                         mHMDParams[7] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[8] = snapshot.child("users").child(mFirebaseUID).child("left_eye_field_of_view_angles").child("0").getValue(Double.class).floatValue();
-                        mHMDParams[9] = snapshot.child("users").child(mFirebaseUID).child("left_eye_field_of_view_angles").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[10] = snapshot.child("users").child(mFirebaseUID).child("left_eye_field_of_view_angles").child("2").getValue(Double.class).floatValue();
-                        mHMDParams[11] = snapshot.child("users").child(mFirebaseUID).child("left_eye_field_of_view_angles").child("3").getValue(Double.class).floatValue();
+                        mHMDParams[8] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("0").getValue(Double.class).floatValue();
+                        mHMDParams[9] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("1").getValue(Double.class).floatValue();
+                        mHMDParams[10] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("2").getValue(Double.class).floatValue();
+                        mHMDParams[11] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("3").getValue(Double.class).floatValue();
 
                         Log.i(TAG, mHMDParams[0] + "," + mHMDParams[1] + "," + mHMDParams[2] + ","
                                 + mHMDParams[3] + "," + mHMDParams[4] + "," + mHMDParams[5] + ","
@@ -116,6 +118,12 @@ public class MainActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState){
         outState.putString("QRData", mQRText);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mQRText = savedInstanceState.getString("QRData");
     }
 
     @Override
