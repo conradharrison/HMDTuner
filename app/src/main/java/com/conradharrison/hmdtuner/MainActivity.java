@@ -40,17 +40,77 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGLView = new MyGLSurfaceView(this);
+        mGLView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                                      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                      View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                                      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                      View.SYSTEM_UI_FLAG_FULLSCREEN |
+                                      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         setContentView(mGLView);
 
         if (savedInstanceState == null) {
             Intent intent = new Intent(this, QRActivity.class);
             startActivityForResult(intent, QR_REQUEST_CODE); // This intent will end automatically.
         } else {
-            // Restored in onRestoreInstanceState()
-            //mQRText = savedInstanceState.getString("QRData");
+            // TODO: Also restored in onRestoreInstanceState()
+            mQRText = savedInstanceState.getString("QRData");
+            firebaseSetup();
         }
     }
 
+    protected void firebaseSetup() {
+
+        Firebase.setAndroidContext(this);
+
+        mFirebaseRef = new Firebase(FIREBASE_URL);
+
+        mFirebaseRef.authWithCustomToken(mQRText, new Firebase.AuthResultHandler() {
+            @Override
+            public void onAuthenticated(AuthData authData) {
+                mFirebaseUID = authData.getUid();
+                Log.i(TAG, "Auth passed: " + mFirebaseUID);
+            }
+            @Override
+            public void onAuthenticationError(FirebaseError firebaseError) {
+                Log.e(TAG, "Auth failed: " + firebaseError.getMessage());
+                Toast.makeText(MainActivity.this, "Authentication with database server failed. Please restart server and try again.", Toast.LENGTH_SHORT).show();
+                MainActivity.this.finish();
+            }
+        });
+
+        //Value event listener for realtime data update
+        mFirebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                mHMDParams[0] = snapshot.child("users").child(mFirebaseUID).child("screen_to_lens_distance").getValue(Double.class).floatValue();
+                mHMDParams[1] = snapshot.child("users").child(mFirebaseUID).child("inter_lens_distance").getValue(Double.class).floatValue();
+                mHMDParams[2] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_r").child("0").getValue(Double.class).floatValue();
+                mHMDParams[3] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_r").child("1").getValue(Double.class).floatValue();
+                mHMDParams[4] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_g").child("0").getValue(Double.class).floatValue();
+                mHMDParams[5] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_g").child("1").getValue(Double.class).floatValue();
+                mHMDParams[6] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("0").getValue(Double.class).floatValue();
+                mHMDParams[7] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("1").getValue(Double.class).floatValue();
+                mHMDParams[8] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("0").getValue(Double.class).floatValue();
+                mHMDParams[9] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("1").getValue(Double.class).floatValue();
+                mHMDParams[10] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("2").getValue(Double.class).floatValue();
+                mHMDParams[11] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("3").getValue(Double.class).floatValue();
+
+                Log.i(TAG, mHMDParams[0] + "," + mHMDParams[1] + "," + mHMDParams[2] + ","
+                        + mHMDParams[3] + "," + mHMDParams[4] + "," + mHMDParams[5] + ","
+                        + mHMDParams[6] + "," + mHMDParams[7] + "," + mHMDParams[8] + ","
+                        + mHMDParams[9] + "," + mHMDParams[10] + "," + mHMDParams[11]);
+
+                mGLView.requestRender();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(TAG, "Firebase onDataChange() failed: " + firebaseError.getMessage());
+                Toast.makeText(MainActivity.this, "Sync with database server failed. Please check database/server, and try again.", Toast.LENGTH_SHORT).show();
+                MainActivity.this.finish();
+            }
+        });
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -58,59 +118,8 @@ public class MainActivity extends AppCompatActivity {
             if (data.hasExtra("QRData")) {
                 mQRText = data.getExtras().getString("QRData");
                 Toast.makeText(this, mQRText, Toast.LENGTH_SHORT).show();
-
-                // Firebase: Create a connection, log in, and add data listener.
-                Firebase.setAndroidContext(this);
-
-                mFirebaseRef = new Firebase(FIREBASE_URL);
-
-                mFirebaseRef.authWithCustomToken(mQRText, new Firebase.AuthResultHandler() {
-                    @Override
-                    public void onAuthenticated(AuthData authData) {
-                        mFirebaseUID = authData.getUid();
-                        Log.i(TAG, "Auth passed: " + mFirebaseUID);
-                    }
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        Log.e(TAG, "Auth failed: " + firebaseError.getMessage());
-                        Toast.makeText(MainActivity.this, "Authentication with database server failed. Please restart server and try again.", Toast.LENGTH_SHORT).show();
-                        MainActivity.this.finish();
-                    }
-                });
-
-                //Value event listener for realtime data update
-                mFirebaseRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        mHMDParams[0] = snapshot.child("users").child(mFirebaseUID).child("screen_to_lens_distance").getValue(Double.class).floatValue();
-                        mHMDParams[1] = snapshot.child("users").child(mFirebaseUID).child("inter_lens_distance").getValue(Double.class).floatValue();
-                        mHMDParams[2] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_r").child("0").getValue(Double.class).floatValue();
-                        mHMDParams[3] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_r").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[4] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_g").child("0").getValue(Double.class).floatValue();
-                        mHMDParams[5] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_g").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[6] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("0").getValue(Double.class).floatValue();
-                        mHMDParams[7] = snapshot.child("users").child(mFirebaseUID).child("distortion_coefficients_b").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[8] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("0").getValue(Double.class).floatValue();
-                        mHMDParams[9] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("1").getValue(Double.class).floatValue();
-                        mHMDParams[10] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("2").getValue(Double.class).floatValue();
-                        mHMDParams[11] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("3").getValue(Double.class).floatValue();
-
-                        Log.i(TAG, mHMDParams[0] + "," + mHMDParams[1] + "," + mHMDParams[2] + ","
-                                + mHMDParams[3] + "," + mHMDParams[4] + "," + mHMDParams[5] + ","
-                                + mHMDParams[6] + "," + mHMDParams[7] + "," + mHMDParams[8] + ","
-                                + mHMDParams[9] + "," + mHMDParams[10] + "," + mHMDParams[11]);
-
-                        mGLView.requestRender();
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        Log.e(TAG, "Firebase onDataChange() failed: " + firebaseError.getMessage());
-                        Toast.makeText(MainActivity.this, "Sync with database server failed. Please check database/server, and try again.", Toast.LENGTH_SHORT).show();
-                        MainActivity.this.finish();
-                    }
-                });
             }
+            firebaseSetup();
         }
     }
 
@@ -130,13 +139,12 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            mGLView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            mGLView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 }
