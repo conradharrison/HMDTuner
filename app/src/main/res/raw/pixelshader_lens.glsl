@@ -31,8 +31,17 @@ vec2 mapper(vec2 in_tex,
     float new_x  = in_tex.x - half_width;
     float new_y  = in_tex.y - half_height;
 
-    float new_position_x = (gl_FragCoord.x - u_ScreenWidth/2)/u_ScreenWidth;
-    float new_position_y = (gl_FragCoord.y - u_ScreenHeight/2)/u_ScreenHeight;
+    float view_port_width = u_ScreenWidth/2.0;
+
+    float offsetted_x;
+    if (gl_FragCoord.x >= u_ScreenWidth/2.0) {
+        offsetted_x = gl_FragCoord.x - u_ScreenWidth/2.0;
+    } else {
+        offsetted_x = gl_FragCoord.x;
+    }
+
+    float new_position_x = (offsetted_x - view_port_width/2.0)/view_port_width;
+    float new_position_y = (gl_FragCoord.y - u_ScreenHeight/2.0)/u_ScreenHeight;
 
     float r2 = (new_position_x*new_position_x + new_position_y*new_position_y);
     float t1 = r2 * distortion_coefficients_k1;
