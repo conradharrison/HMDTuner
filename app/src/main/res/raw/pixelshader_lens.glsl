@@ -3,8 +3,10 @@
 const int HMD_PARAMS_SIZE = 12;
 
 uniform float u_HMDParams[HMD_PARAMS_SIZE];
-uniform vec4 u_Color;
 uniform sampler2D u_Texture;
+
+uniform float u_ScreenWidth;
+uniform float u_ScreenHeight;
 
 varying vec3 v_Position;		// Interpolated position for this fragment. Unused
 varying vec2 v_TexCoordinate;   // Interpolated texture coordinate per fragment.
@@ -29,11 +31,15 @@ vec2 mapper(vec2 in_tex,
     float new_x  = in_tex.x - half_width;
     float new_y  = in_tex.y - half_height;
 
-    float r2 = (new_x*new_x + new_y*new_y) * distortion_coefficients_k1;
-    float r4 = (new_x*new_x + new_y*new_y) * (new_x*new_x + new_y*new_y) * distortion_coefficients_k2;
+    float new_position_x = (gl_FragCoord.x - u_ScreenWidth/2)/u_ScreenWidth;
+    float new_position_y = (gl_FragCoord.y - u_ScreenHeight/2)/u_ScreenHeight;
 
-    out_tex.x = half_width + ((1.0 + r2 + r4) * new_x);
-    out_tex.y = half_height + ((1.0 + r2 + r4) * new_y);
+    float r2 = (new_position_x*new_position_x + new_position_y*new_position_y);
+    float t1 = r2 * distortion_coefficients_k1;
+    float t2 = r2 * r2 * distortion_coefficients_k2;
+
+    out_tex.x = half_width + ((1.0 + t1 + t2) * new_x);
+    out_tex.y = half_height + ((1.0 + t1 + t2) * new_y);
 
     return out_tex;
 }

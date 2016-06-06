@@ -71,11 +71,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw left square
         GLES20.glViewport(0, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
 
         // Draw right square
         GLES20.glViewport(mScreenWidth/2, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
     }
 
     @Override

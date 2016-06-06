@@ -17,9 +17,10 @@ public class Square {
     private final FloatBuffer texelBuffer;
     private final ShortBuffer drawListBuffer;
     private int mPositionHandle;
-    private int mColorHandle;
     private int mMVPMatrixHandle;
     private int mHMDParamsHandle;
+    private int mScreenHeightHandle;
+    private int mScreenWidthHandle;
 
     private FloatBuffer mCubeTextureCoordinates;
     private int mTextureUniformHandle;
@@ -51,9 +52,7 @@ public class Square {
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final int texelStride = COORDS_PER_TEXEL * 4; // 4 bytes per vertex
 
-    float color[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-
-    /**
+        /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public Square(Context context) {
@@ -85,7 +84,7 @@ public class Square {
         texelBuffer.position(0);
 
         // Read in an image and set as texture, store handle for later.
-        mTextureHandle = TextureHelper.loadTexture(context, R.raw.grid);
+        mTextureHandle = TextureHelper.loadTexture(context, R.raw.grid_inv);
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureHandle);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -94,7 +93,7 @@ public class Square {
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      */
-    public void draw(float[] mvpMatrix, float[] HMDParams) {
+    public void draw(float[] mvpMatrix, float[] HMDParams, int mScreenWidth, int mScreenHeight) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(MyGLRenderer.mProgram);
 
@@ -118,8 +117,11 @@ public class Square {
         mHMDParamsHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_HMDParams");
         GLES20.glUniform1fv(mHMDParamsHandle, MainActivity.HMD_PARAMS_SIZE, FloatBuffer.wrap(HMDParams));
 
-        mColorHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Color");
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        mScreenHeightHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_ScreenHeight");
+        GLES20.glUniform1f(mScreenHeightHandle, (float) mScreenHeight);
+
+        mScreenWidthHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_ScreenWidth");
+        GLES20.glUniform1f(mScreenWidthHandle, (float) mScreenWidth);
 
         mTextureUniformHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Texture");
         GLES20.glUniform1i(mTextureUniformHandle, 0);
