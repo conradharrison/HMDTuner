@@ -36,8 +36,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -6, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
         int vertexShader = ShaderHelper.compileShader(
                 GLES20.GL_VERTEX_SHADER,
                 getVertexShader());
@@ -61,19 +59,30 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Recalculate frustum based on screen_to_lens_distance.
-        // Keep nearPlan greater than 0.00f
-        float nearPlane = (3.0f / 42.0f) * MainActivity.mHMDParams[0];
-        nearPlane = (nearPlane==0.00f ? 0.01f : nearPlane);
+        float screenToLensDistance = MainActivity.mHMDParams[0];
+        float interLensDistance = MainActivity.mHMDParams[1];
+        float pixelsPerInch = MainActivity.mHMDParams[12];
+        float pixelsPerMm = pixelsPerInch / 25.4f;
+        float widthPixels = 1920.0f;
+        float DEFAULT_INTER_LENS_DISTANCE = 60.f;
+        float DEFAULT_SCREEN_TO_LENS_DISTANCE = 42.0f;
+        float screenToLensFactor = (screenToLensDistance == 0.0f ? 1.0f : (DEFAULT_SCREEN_TO_LENS_DISTANCE / screenToLensDistance));
+        float interEyeFactor = ((interLensDistance - DEFAULT_INTER_LENS_DISTANCE)/2) * pixelsPerMm * (4.0f*screenToLensFactor / widthPixels);
 
-        Matrix.frustumM(mProjectionMatrix, 0, -1, 1, -1, 1, nearPlane, 7);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // Draw left square
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f+interEyeFactor, 0, -1.0f, 0.0f+interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
         GLES20.glViewport(0, 0, mScreenWidth/2, mScreenHeight);
         mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
 
         // Draw right square
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f-interEyeFactor, 0, -1.0f, 0.0f-interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
         GLES20.glViewport(mScreenWidth/2, 0, mScreenWidth/2, mScreenHeight);
         mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
     }
@@ -85,15 +94,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // such as screen rotation
         mScreenWidth = width;
         mScreenHeight = height;
-        //GLES20.glViewport(0, 0, width, height);
-
-        // Recalculate furstum based on screen_to_lens_distance
-        //float ratio = 1.0f; //(float) width / height;
-        //float nearPlane = (3.0f / 42.0f) * MainActivity.mHMDParams[0];
-        //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, nearPlane, 7);
-
-        // Calculate MVP matrix
-        //Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
     }
 
     /**

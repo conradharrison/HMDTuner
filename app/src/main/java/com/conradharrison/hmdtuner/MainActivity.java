@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int QR_REQUEST_CODE = 42;
 
     // Number of parameters needed to control the render
-    static final int HMD_PARAMS_SIZE = 12;
+    static final int HMD_PARAMS_SIZE = 13;
 
     // We will keep this array in sync with Firebase
     public static float[] mHMDParams = new float[HMD_PARAMS_SIZE];
@@ -94,11 +94,12 @@ public class MainActivity extends AppCompatActivity {
                 mHMDParams[9] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("1").getValue(Double.class).floatValue();
                 mHMDParams[10] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("2").getValue(Double.class).floatValue();
                 mHMDParams[11] = snapshot.child("users").child(mFirebaseUID).child("field_of_view_angles").child("3").getValue(Double.class).floatValue();
+                mHMDParams[12] = snapshot.child("users").child(mFirebaseUID).child("display_pixels_per_inch").getValue(Double.class).floatValue();
 
                 Log.i(TAG, mHMDParams[0] + "," + mHMDParams[1] + "," + mHMDParams[2] + ","
                         + mHMDParams[3] + "," + mHMDParams[4] + "," + mHMDParams[5] + ","
                         + mHMDParams[6] + "," + mHMDParams[7] + "," + mHMDParams[8] + ","
-                        + mHMDParams[9] + "," + mHMDParams[10] + "," + mHMDParams[11]);
+                        + mHMDParams[9] + "," + mHMDParams[10] + "," + mHMDParams[11] + "," + mHMDParams[12]);
 
                 mGLView.requestRender();
             }
