@@ -71,7 +71,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
         // Draw left square
-        Matrix.setLookAtM(mViewMatrix, 0, 0.0f+interEyeFactor, 0, -1.0f, 0.0f+interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f-interEyeFactor, 0, -1.0f, 0.0f-interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
@@ -79,7 +79,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
 
         // Draw right square
-        Matrix.setLookAtM(mViewMatrix, 0, 0.0f-interEyeFactor, 0, -1.0f, 0.0f-interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f+interEyeFactor, 0, -1.0f, 0.0f+interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
