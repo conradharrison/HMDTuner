@@ -67,24 +67,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float DEFAULT_INTER_LENS_DISTANCE = 60.f;
         float DEFAULT_SCREEN_TO_LENS_DISTANCE = 42.0f;
         float screenToLensFactor = (screenToLensDistance == 0.0f ? 1.0f : (DEFAULT_SCREEN_TO_LENS_DISTANCE / screenToLensDistance));
-        float interEyeFactor = ((interLensDistance - DEFAULT_INTER_LENS_DISTANCE)/2) * pixelsPerMm * (4.0f*screenToLensFactor / widthPixels);
+        int interEyePixels = (int)(((interLensDistance - DEFAULT_INTER_LENS_DISTANCE)/2) * pixelsPerMm);
 
 
         // Draw left square
-        Matrix.setLookAtM(mViewMatrix, 0, 0.0f-interEyeFactor, 0, -1.0f, 0.0f-interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f, 0, -1.0f, 0.0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        GLES20.glViewport(0, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
+        GLES20.glViewport(0 - interEyePixels, 0, mScreenWidth/2, mScreenHeight);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight, interEyePixels);
 
         // Draw right square
-        Matrix.setLookAtM(mViewMatrix, 0, 0.0f+interEyeFactor, 0, -1.0f, 0.0f+interEyeFactor, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0.0f, 0, -1.0f, 0.0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.orthoM(mProjectionMatrix, 0, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, -1.0f*screenToLensFactor, 1.0f*screenToLensFactor, 0.0f, 2.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        GLES20.glViewport(mScreenWidth/2, 0, mScreenWidth/2, mScreenHeight);
-        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight);
+        GLES20.glViewport(mScreenWidth/2 + interEyePixels, 0, mScreenWidth/2, mScreenHeight);
+        mSquare.draw(mMVPMatrix, MainActivity.mHMDParams, mScreenWidth, mScreenHeight, interEyePixels);
     }
 
     @Override

@@ -7,6 +7,7 @@ uniform sampler2D u_Texture;
 
 uniform float u_ScreenWidth;
 uniform float u_ScreenHeight;
+uniform float u_interEyePixels;
 
 varying vec3 v_Position;		// Interpolated position for this fragment. Unused
 varying vec2 v_TexCoordinate;   // Interpolated texture coordinate per fragment.
@@ -35,9 +36,9 @@ vec2 mapper(vec2 in_tex,
 
     float offsetted_x;
     if (gl_FragCoord.x >= u_ScreenWidth/2.0) {
-        offsetted_x = gl_FragCoord.x - u_ScreenWidth/2.0;
+        offsetted_x = gl_FragCoord.x - u_ScreenWidth/2.0 - u_interEyePixels;
     } else {
-        offsetted_x = gl_FragCoord.x;
+        offsetted_x = gl_FragCoord.x + u_interEyePixels;
     }
 
     float new_position_x = (offsetted_x - view_port_width/2.0)/view_port_width;

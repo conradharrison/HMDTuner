@@ -7,11 +7,14 @@ import java.nio.ShortBuffer;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.util.Log;
 
 /**
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
 public class Square {
+
+    private static final String TAG = "Square";
 
     private final FloatBuffer vertexBuffer;
     private final FloatBuffer texelBuffer;
@@ -21,6 +24,7 @@ public class Square {
     private int mHMDParamsHandle;
     private int mScreenHeightHandle;
     private int mScreenWidthHandle;
+    private int mInterEyePixelsHandle;
 
     private FloatBuffer mCubeTextureCoordinates;
     private int mTextureUniformHandle;
@@ -93,7 +97,7 @@ public class Square {
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      */
-    public void draw(float[] mvpMatrix, float[] HMDParams, int mScreenWidth, int mScreenHeight) {
+    public void draw(float[] mvpMatrix, float[] HMDParams, float mScreenWidth, float mScreenHeight, float mInterEyePixels) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(MyGLRenderer.mProgram);
 
@@ -118,10 +122,14 @@ public class Square {
         GLES20.glUniform1fv(mHMDParamsHandle, MainActivity.HMD_PARAMS_SIZE, FloatBuffer.wrap(HMDParams));
 
         mScreenHeightHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_ScreenHeight");
-        GLES20.glUniform1f(mScreenHeightHandle, (float) mScreenHeight);
+        GLES20.glUniform1f(mScreenHeightHandle, mScreenHeight);
 
         mScreenWidthHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_ScreenWidth");
-        GLES20.glUniform1f(mScreenWidthHandle, (float) mScreenWidth);
+        GLES20.glUniform1f(mScreenWidthHandle, mScreenWidth);
+
+        mInterEyePixelsHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_interEyePixels");
+        GLES20.glUniform1f(mInterEyePixelsHandle, mInterEyePixels);
+        Log.i(TAG, "mInterEyePixels = " + mInterEyePixels);
 
         mTextureUniformHandle = GLES20.glGetUniformLocation(MyGLRenderer.mProgram, "u_Texture");
         GLES20.glUniform1i(mTextureUniformHandle, 0);
